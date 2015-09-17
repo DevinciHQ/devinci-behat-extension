@@ -1,0 +1,13 @@
+{
+    "name": "devinci/devinci-behat-extension",
+    "description": "Extra goodies for behat.",
+    "require": {
+        "behat/transliterator": "3.*"
+    },
+    "authors": [
+        {
+            "name": "Frank Carey",
+            "email": "frank@devinci.io"
+        }
+    ]
+}
