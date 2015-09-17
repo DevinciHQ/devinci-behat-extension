@@ -6,6 +6,7 @@ use Behat\MinkExtension\Context\RawMinkContext;
 use Behat\Behat\Hook\Scope\BeforeStepScope;
 use Behat\Behat\Hook\Scope\AfterStepScope;
 use Behat\Behat\Hook\Scope\BeforeScenarioScope;
+use Behat\Mink\Driver\Selenium2Driver as Selenium2Driver;
 
 /**
  * Defines application features from the specific context.
@@ -14,11 +15,12 @@ class DebugContext extends RawMinkContext {
 
   /** @var \Behat\Gherkin\Node\ScenarioNode */
   public $scenario;
+  public $environment;
+  public $lastStep = 'none';
   public $asset_dump_path;
 
   // Uses 'named' arguments. See https://github.com/Behat/Behat/issues/524#issuecomment-42305620
-  public function __construct($asset_dump_path)
-  {
+  public function __construct($asset_dump_path) {
     $this->asset_dump_path = $asset_dump_path ? $asset_dump_path : '/tmp';
   }
 
@@ -29,19 +31,10 @@ class DebugContext extends RawMinkContext {
   /**
    * @AfterStep
    */
-  public function debugStepsAfter(AfterStepScope $scope)
-  {
+  public function debugStepsAfter(AfterStepScope $scope) {
     // Tests tagged with @debugEach will perform each step and wait for [ENTER] to proceed.
     if ($this->scenario->hasTag('debugEach')) {
-      $env = $scope->getEnvironment();
-      $minkContext = $env->getContext('Drupal\DrupalExtension\Context\MinkContext');
-      // Print the current URL.
-      try {
-        $minkContext->printCurrentUrl();
-      }
-      catch(Behat\Mink\Exception\DriverException $e) {
-        print "No Url";
-      }
+      $this->printUrl();
       $this->iPutABreakpoint();
     }
   }
@@ -49,10 +42,10 @@ class DebugContext extends RawMinkContext {
   /**
    * @BeforeStep
    */
-  public function debugStepsBefore(BeforeStepScope $scope)
-  {
+  public function debugStepsBefore(BeforeStepScope $scope) {
     // Tests tagged with @debugBeforeEach will wait for [ENTER] before running each step.
     if ($this->scenario->hasTag('debugBeforeEach')) {
+      $this->printUrl();
       $this->iPutABreakpoint();
     }
   }
@@ -63,8 +56,16 @@ class DebugContext extends RawMinkContext {
   public function registerScenario(BeforeScenarioScope $scope) {
     // Scenario not usually available to steps, so we do ourselves.
     $this->scenario = $scope->getScenario();
+    $this->environment = $scope->getEnvironment();
   }
 
+  /**
+   * @BeforeStep
+   */
+  public function trackLastStep(BeforeStepScope $scope) {
+    // Tests tagged with @debugBeforeEach will wait for [ENTER] before running each step.
+    $this->lastStep = $scope->getStep();
+  }
   /**
    * Take screenshot and Captures the HTML when step fails.
    * Works only with Selenium2Driver.
@@ -73,15 +74,12 @@ class DebugContext extends RawMinkContext {
    */
   public function dumpAssetsAfterFailedStep(AfterStepScope $scope) {
     if (99 === $scope->getTestResult()->getResultCode()) {
-      $driver = $this->getSession()->getDriver();
-      // Only works for Selenium2
-      if ($driver instanceof Behat\Mink\Driver\Selenium2Driver) {
-        $screenshot = $this->getSession()->getDriver()->getScreenshot();
-        $this->dumpAsset('screenshot', $scope->getStep()->getText(), 'png', $screenshot);
+      // Only attempt to grab assets if we're at a url.
+      if ($this->printUrl()) {
+        $this->grabScreenshot();
+        // Dump the html.
+        $this->grabHtml();
       }
-      // Log the html.
-      $this->dumpAsset('html dump', $scope->getStep()->getText(), 'html', $this->getSession()->getPage()->getContent());
-
       // Log the watchdog
       //$this->dumpAsset('watchdog exception', $event->getStep()->getText() , 'log', $this->getWatchdog());
     }
@@ -95,20 +93,64 @@ class DebugContext extends RawMinkContext {
    * Helper function to dump an asset to disk for use later.
    */
   function dumpAsset($type, $msg, $extension, $contents) {
-    $type_safe = preg_replace('/[^a-zA-Z0-9]/','-', $type);
-    $msg_safe = preg_replace('/[^a-zA-Z0-9]/','-', $msg);
+    $type_safe = preg_replace('/[^a-zA-Z0-9]/', '-', $type);
+    $msg_safe = preg_replace('/[^a-zA-Z0-9]/', '-', $msg);
     $timestamp = @date('Y-m-d-H-i-s');
     $filename = $this->asset_dump_path . "/test-failure-$type_safe-{$timestamp}_{$msg_safe}.$extension";
     $url = $this->getSession()->getCurrentUrl();
     file_put_contents($filename, $contents);
-    print "\nAsset Captured ($type) for step '". $msg ."' while at url: ". $url  ." and placed at: " . $filename . "\n" ;
+    print "\nAsset Captured ($type) for step '" . $msg . "' while at url: " . $url . " and placed at: " . $filename . "\n";
   }
 
-  public function iPutABreakpoint()
-  {
+  public function iPutABreakpoint() {
     fwrite(STDOUT, "\033[s \033[93m[Breakpoint] Press \033[1;93m[RETURN]\033[0;93m to continue...\033[0m");
-    while (fgets(STDIN, 1024) == '') {}
+    while (fgets(STDIN, 1024) == '') {
+    }
     fwrite(STDOUT, "\033[u");
     return;
+  }
+
+  public function printUrl() {
+    // Print the current URL.
+    try {
+      print "Current URL: ";
+      print $this->getSession()->getCurrentUrl();
+      print "\n";
+      return TRUE;
+    } catch (Behat\Mink\Exception\DriverException $e) {
+      print "No Url";
+      return FALSE;
+    }
+  }
+
+  /**
+   * @Given grab a screenshot
+   * @Given grab a screenshot with a filename :filename
+   */
+  public function grabScreenshot($filename = null) {
+    // Only Selenium2 driver supports screenshots.
+    if (!$filename) {
+      $filename = $this->lastStep->getText();
+    }
+    $driver = $this->getSession()->getDriver();
+    if ($driver instanceof Selenium2Driver) {
+      $screenshot = $driver->getScreenshot();
+      $this->dumpAsset('screenshot', $this->lastStep->getText(), 'png', $screenshot);
+    }
+    else {
+     print "Only a Selenium2Driver supports screenshots.";
+    }
+  }
+
+  /**
+   * @Given grab the html
+   * @Given grab the html with a filename :filename
+   */
+  public function grabHtml($filename = null) {
+    if (!$filename) {
+      $filename = $this->lastStep->getText();
+    }
+    // Dump the html.
+    $this->dumpAsset('html dump', $filename, 'html', $this->getSession()->getPage()->getContent());
   }
 }
