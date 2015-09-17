@@ -2,6 +2,7 @@
     "name": "devinci/devinci-behat-extension",
     "description": "Provides extra behat goodies.",
     "keywords": ["behat", "test"],
+    "license": "MIT",
     "require": {
         "behat/behat": "~3.0"
     },
