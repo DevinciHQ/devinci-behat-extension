@@ -34,7 +34,6 @@ class DebugContext extends RawMinkContext {
     // Tests tagged with @debugEach will perform each step and wait for [ENTER] to proceed.
     if ($this->scenario->hasTag('debugEach')) {
       $env = $scope->getEnvironment();
-      $drupalContext = $env->getContext('Drupal\DrupalExtension\Context\DrupalContext');
       $minkContext = $env->getContext('Drupal\DrupalExtension\Context\MinkContext');
       // Print the current URL.
       try {
@@ -43,7 +42,7 @@ class DebugContext extends RawMinkContext {
       catch(Behat\Mink\Exception\DriverException $e) {
         print "No Url";
       }
-      $drupalContext->iPutABreakpoint();
+      $this->iPutABreakpoint();
     }
   }
 
@@ -54,9 +53,7 @@ class DebugContext extends RawMinkContext {
   {
     // Tests tagged with @debugBeforeEach will wait for [ENTER] before running each step.
     if ($this->scenario->hasTag('debugBeforeEach')) {
-      $env = $scope->getEnvironment();
-      $drupalContext = $env->getContext('Drupal\DrupalExtension\Context\DrupalContext');
-      $drupalContext->iPutABreakpoint();
+      $this->iPutABreakpoint();
     }
   }
 
