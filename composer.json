@@ -1,13 +1,19 @@
 {
     "name": "devinci/devinci-behat-extension",
-    "description": "Extra goodies for behat.",
+    "description": "Provides extra behat goodies.",
+    "keywords": ["behat", "test"],
     "require": {
-        "behat/transliterator": "3.*"
+        "behat/behat": "~3.0"
     },
     "authors": [
         {
             "name": "Frank Carey",
             "email": "frank@devinci.io"
         }
-    ]
+    ],
+    "autoload": {
+        "psr-0": {
+          "Devinci\\DevinciExtension\\": "src/"
+        }
+    }
 }
