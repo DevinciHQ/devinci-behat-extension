@@ -1,0 +1,20 @@
+default:
+  suites:
+    default:
+      contexts:
+        - FeatureContext
+        - Behat\MinkExtension\Context\MinkContext
+        - Devinci\DevinciExtension\Context\DebugContext:
+              asset_dump_path: %paths.base%/assets/
+        - Devinci\DevinciExtension\Context\JavascriptContext:
+              maximum_wait: 30
+  extensions:
+    Behat\MinkExtension:
+      base_url: http://localhost:4444
+      goutte: ~
+      selenium2: ~
+      # Use goutte (basic PHP browser, super fast) as the default driver.
+      default_session: goutte
+      # For real browser testing and tests requiring JS use selenium2 driver.
+      # Tag features/scenarious with @javascript to use the selenium2 driver.
+      javascript_session: selenium2

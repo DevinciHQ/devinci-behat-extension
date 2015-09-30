@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Page</title>
+    <script type="text/javascript">
+        function waitAndText(){
+            setTimeout(function(){
+                document.getElementById("hiddenText").innerHTML = "Hello World";
+            }, 5000);
+        }
+    </script>
+</head>
+<body>
+    <h1>Welcome to the test page</h1>
+    <br/>
+    <button onclick="waitAndText();" > Click me </button>
+    <br/>
+    <p id="hiddenText"></p>
+</body>
+</html>
