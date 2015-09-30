@@ -18,5 +18,5 @@ Feature: DevinciExtension
   @javascript
   Scenario: I can wait for javascript to load
     Given I am on "/index.html"
-    When I press "Click me"
+    When I press "clickMe"
     Then I wait for "Hello World"

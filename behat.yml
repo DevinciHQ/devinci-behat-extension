@@ -12,7 +12,9 @@ default:
     Behat\MinkExtension:
       base_url: http://localhost:8000
       goutte: ~
-      selenium2: ~
+      selenium2:
+        wd_host: http://localhost:4444/wd/hub
+      browser_name: firefox
       # Use goutte (basic PHP browser, super fast) as the default driver.
       default_session: goutte
       # For real browser testing and tests requiring JS use selenium2 driver.
