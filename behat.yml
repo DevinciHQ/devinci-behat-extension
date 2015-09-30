@@ -10,7 +10,7 @@ default:
               maximum_wait: 30
   extensions:
     Behat\MinkExtension:
-      base_url: http://localhost:4444
+      base_url: http://localhost:8000
       goutte: ~
       selenium2: ~
       # Use goutte (basic PHP browser, super fast) as the default driver.
