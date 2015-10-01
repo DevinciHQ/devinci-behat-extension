@@ -1,14 +1,32 @@
-language: php
+## Customize machine
+machine:
+  php:
+    version: 5.4.37
 
-php: [5.6, 5.5, 5.4, 5.3, hhvm]
+## Customize dependencies
+dependencies:
+  pre:
+    # Configure Git
+    - git config --global user.email "ci@circleci.com" && git config --global user.name "Circle CI"
+    # Download selenium
+    - wget -q http://goo.gl/yLJLZg -O selenium-server.jar
+    - sudo mv selenium-server.jar /usr/local/bin
+    # Make assets folder
+    - mkdir assets
 
-install:
-  - composer install --dev --prefer-source
-
-before_script:
-  # Start stand-alone server
-  - php -S localhost:8000 > /dev/null 2>&1
-
-script:
-  - vendor/bin/behat -fprogress --strict
-
+## Customize test commands
+test:
+  pre:
+    # Setup local server
+    - "php -S localhost:8000":
+        background: true
+    # Start selenium2 server
+    - java -jar /usr/local/bin/selenium-server.jar:
+        background: true
+    - sleep 3
+  override:
+    # Run Behat tests
+    - vendor/bin/behat
+  post:
+    # Copy screenshots to artifacts folder to view
+    - cp -R assets $CIRCLE_ARTIFACTS
