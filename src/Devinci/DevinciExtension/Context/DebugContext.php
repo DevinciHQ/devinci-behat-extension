@@ -92,11 +92,16 @@ class DebugContext extends RawMinkContext {
   /**
    * Helper function to dump an asset to disk for use later.
    */
-  function dumpAsset($type, $msg, $extension, $contents) {
-    $type_safe = preg_replace('/[^a-zA-Z0-9]/', '-', $type);
-    $msg_safe = preg_replace('/[^a-zA-Z0-9]/', '-', $msg);
-    $timestamp = @date('Y-m-d-H-i-s');
-    $filename = $this->asset_dump_path . "/test-failure-$type_safe-{$timestamp}_{$msg_safe}.$extension";
+  function dumpAsset($type, $msg, $extension, $contents, $filename = null) {
+    if ($filename == null) {
+      $type_safe = preg_replace('/[^a-zA-Z0-9]/', '-', $type);
+      $msg_safe = preg_replace('/[^a-zA-Z0-9]/', '-', $msg);
+      $timestamp = @date('Y-m-d-H-i-s');
+      $filename = $this->asset_dump_path . "/test-failure-$type_safe-{$timestamp}_{$msg_safe}.$extension";
+    }
+    else {
+      $filename = $this->asset_dump_path . "/$filename" . ".$extension";
+    }
     $url = $this->getSession()->getCurrentUrl();
     file_put_contents($filename, $contents);
     print "\nAsset Captured ($type) for step '" . $msg . "' while at url: " . $url . " and placed at: " . $filename . "\n";
@@ -135,7 +140,7 @@ class DebugContext extends RawMinkContext {
     $driver = $this->getSession()->getDriver();
     if ($driver instanceof Selenium2Driver) {
       $screenshot = $driver->getScreenshot();
-      $this->dumpAsset('screenshot', $this->lastStep->getText(), 'png', $screenshot);
+      $this->dumpAsset('screenshot', $filename, 'png', $screenshot, $filename);
     }
     else {
      print "Only a Selenium2Driver supports screenshots.";
