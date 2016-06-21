@@ -135,12 +135,12 @@ class DebugContext extends RawMinkContext {
   public function grabScreenshot($filename = null) {
     // Only Selenium2 driver supports screenshots.
     if (!$filename) {
-      $filename = $this->lastStep->getText();
+      $text = $this->lastStep->getText();
     }
     $driver = $this->getSession()->getDriver();
     if ($driver instanceof Selenium2Driver) {
       $screenshot = $driver->getScreenshot();
-      $this->dumpAsset('screenshot', $filename, 'png', $screenshot, $filename);
+      $this->dumpAsset('screenshot', $text, 'png', $screenshot, $filename);
     }
     else {
      print "Only a Selenium2Driver supports screenshots.";
