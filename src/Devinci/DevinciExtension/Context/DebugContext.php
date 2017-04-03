@@ -7,6 +7,7 @@ use Behat\Behat\Hook\Scope\BeforeStepScope;
 use Behat\Behat\Hook\Scope\AfterStepScope;
 use Behat\Behat\Hook\Scope\BeforeScenarioScope;
 use Behat\Mink\Driver\Selenium2Driver as Selenium2Driver;
+use \Zumba\Mink\Driver\BasePhantomJSDriver;
 
 /**
  * Defines application features from the specific context.
@@ -136,9 +137,10 @@ class DebugContext extends RawMinkContext {
     // Only Selenium2 driver supports screenshots.
     if (!$filename) {
       $text = $this->lastStep->getText();
+      $filename = preg_replace('/[^a-zA-Z0-9 ]/', ' ', $filename);
     }
     $driver = $this->getSession()->getDriver();
-    if ($driver instanceof Selenium2Driver) {
+    if ($driver instanceof Selenium2Driver || $driver instanceof BasePhantomJSDriver) {
       $screenshot = $driver->getScreenshot();
       $this->dumpAsset('screenshot', $text, 'png', $screenshot, $filename);
     }
@@ -154,6 +156,7 @@ class DebugContext extends RawMinkContext {
   public function grabHtml($filename = null) {
     if (!$filename) {
       $filename = $this->lastStep->getText();
+      $filename = preg_replace('/[^a-zA-Z0-9 ]/', ' ', $filename);
     }
     // Dump the html.
     $this->dumpAsset('html dump', $filename, 'html', $this->getSession()->getPage()->getContent());

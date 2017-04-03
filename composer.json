@@ -8,7 +8,8 @@
         "behat/mink": "~1.5",
         "behat/mink-goutte-driver": "~1.0",
         "behat/mink-selenium2-driver": "~1.1",
-        "behat/mink-extension": "~2.0"
+        "behat/mink-extension": "~2.0",
+        "jcalderonzumba/mink-phantomjs-driver": "~0.3.3"
     },
     "authors": [
         {
