@@ -6,10 +6,12 @@
     "require": {
         "behat/behat": "~3.0",
         "behat/mink": "~1.5",
-        "behat/mink-goutte-driver": "~1.0",
         "behat/mink-selenium2-driver": "~1.1",
         "behat/mink-extension": "~2.0"
     },
+    "require-dev": {
+        "behat/mink-goutte-driver": "~1.0",
+    }
     "authors": [
         {
             "name": "Frank Carey",
