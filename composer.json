@@ -11,7 +11,7 @@
     },
     "require-dev": {
         "behat/mink-goutte-driver": "~1.0",
-    }
+    },
     "authors": [
         {
             "name": "Frank Carey",
