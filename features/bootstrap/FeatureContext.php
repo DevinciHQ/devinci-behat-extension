@@ -1,10 +1,6 @@
 <?php
 
 use Behat\Behat\Context\Context;
-use Behat\Gherkin\Node\PyStringNode;
-use Drupal\DrupalExtension\Hook\Scope\EntityScope;
-use Symfony\Component\Process\PhpExecutableFinder;
-use Symfony\Component\Process\Process;
 
 class FeatureContext implements Context {
 
